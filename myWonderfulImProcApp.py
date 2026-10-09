@@ -122,6 +122,19 @@ def doVflip(pixels, width, height):
     # return the list of vertically flipped pixels
     return result
 
+def doDflip(pixels, width, height):
+    result = []
+
+   #combination of H and V flips
+    for x in range(width):
+        for y in range(height):
+            # calculate the index of the pixel in the original image
+            old_index = (y * width) + x
+            result.append(pixels[old_index])
+
+    # return the list of diagonally flipped pixels
+    return result
+
 
 def printHelp():
     # display the available commands and their usage
@@ -152,6 +165,9 @@ Commands:
         
     --vflip
         Flip the image vertically (top to bottom).
+        
+    --dflip
+        Flip the image diagonally (transpose - swaps width and height).
 
     --help
         Display this help message.
@@ -191,7 +207,7 @@ def main():
         output_file = sys.argv[4]
 
     # the negative & hflip operation does not require an additional parameter
-    elif command in ("--negative", "--hflip", "--vflip"):
+    elif command in ("--negative", "--hflip", "--vflip", "--dflip"):
         if len(sys.argv) != 4:
             print(f"Usage: {command} input.bmp output.bmp")
             return
@@ -244,6 +260,9 @@ def main():
         elif command == "--vflip":
             # vflip requires width and height to calculate row positions
             pixels = doVflip(pixels, width, height)
+
+        elif command == "--dflip":
+            pixels = doDflip(pixels, width, height)
 
         # create a new image with the original dimensions and mode
         result = Image.new(mode, (width, height))
