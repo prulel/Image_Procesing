@@ -102,6 +102,27 @@ def doHflip(pixels, width, height):
     return result
 
 
+def doVflip(pixels, width, height):
+    result = []
+
+    # process the image row by row
+    for y in range(height):
+        # calculate the y-coordinate of the corresponding row from the bottom
+        bottom_y = (height - 1) - y
+
+        # find the starting index of that bottom row
+        row_start_index = bottom_y * width
+
+        # loop forwards through the current row
+        for x in range(width):
+            # grab the pixel moving left to right
+            pixel = pixels[row_start_index + x]
+            result.append(pixel)
+
+    # return the list of vertically flipped pixels
+    return result
+
+
 def printHelp():
     # display the available commands and their usage
     print("""
@@ -111,6 +132,8 @@ Usage:
     python myWonderfulImProcApp.py --brightness VALUE input.bmp output.bmp
     python myWonderfulImProcApp.py --contrast VALUE input.bmp output.bmp
     python myWonderfulImProcApp.py --negative input.bmp output.bmp
+    python myWonderfulImProcApp.py --hflip input.bmp output.bmp
+    python myWonderfulImProcApp.py --vflip input.bmp output.bmp
 
 Commands:
     --brightness VALUE
@@ -126,6 +149,9 @@ Commands:
         
     --hflip
         Flip the image horizontally (left to right).
+        
+    --vflip
+        Flip the image vertically (top to bottom).
 
     --help
         Display this help message.
@@ -165,7 +191,7 @@ def main():
         output_file = sys.argv[4]
 
     # the negative & hflip operation does not require an additional parameter
-    elif command in ("--negative", "--hflip"):
+    elif command in ("--negative", "--hflip", "--vflip"):
         if len(sys.argv) != 4:
             print(f"Usage: {command} input.bmp output.bmp")
             return
@@ -214,6 +240,10 @@ def main():
         elif command == "--hflip":
             # hflip requires width and height to know where rows end
             pixels = doHflip(pixels, width, height)
+
+        elif command == "--vflip":
+            # vflip requires width and height to calculate row positions
+            pixels = doVflip(pixels, width, height)
 
         # create a new image with the original dimensions and mode
         result = Image.new(mode, (width, height))
