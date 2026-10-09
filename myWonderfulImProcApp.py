@@ -84,6 +84,24 @@ def doNegative(pixels):
     return result
 
 
+def doHflip(pixels, width, height):
+    result = []
+
+    # process the image row by row
+    for y in range(height):
+        # find the index of the last pixel in the current row
+        row_end_index = (y * width) + width - 1
+
+        # loop backwards through the current row
+        for x in range(width):
+            # subtract x from the end index to walk backwards
+            pixel = pixels[row_end_index - x]
+            result.append(pixel)
+
+    # return the list of horizontally flipped pixels
+    return result
+
+
 def printHelp():
     # display the available commands and their usage
     print("""
@@ -105,6 +123,9 @@ Commands:
 
     --negative
         Invert each pixel channel: output = 255 - input.
+        
+    --hflip
+        Flip the image horizontally (left to right).
 
     --help
         Display this help message.
@@ -143,12 +164,10 @@ def main():
         input_file = sys.argv[3]
         output_file = sys.argv[4]
 
-    # the negative operation does not require an additional parameter
-    elif command == "--negative":
-
-        # check that the correct number of arguments was provided
+    # the negative & hflip operation does not require an additional parameter
+    elif command in ("--negative", "--hflip"):
         if len(sys.argv) != 4:
-            print("Usage: --negative input.bmp output.bmp")
+            print(f"Usage: {command} input.bmp output.bmp")
             return
 
         # no additional parameter is needed for the negative operation
@@ -191,6 +210,10 @@ def main():
 
         elif command == "--negative":
             pixels = doNegative(pixels)
+
+        elif command == "--hflip":
+            # hflip requires width and height to know where rows end
+            pixels = doHflip(pixels, width, height)
 
         # create a new image with the original dimensions and mode
         result = Image.new(mode, (width, height))
