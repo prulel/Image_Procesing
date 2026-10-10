@@ -136,6 +136,61 @@ def doDflip(pixels, width, height):
     return result
 
 
+def doShrink(pixels, width, height, param):
+    # convert the shrink factor to an integer
+    factor = int(param)
+
+    # check that the shrink factor is valid
+    if factor <= 0:
+        raise ValueError("Shrink factor must be greater than 0!")
+
+    result = []
+
+    # calculate new dimensions after shrinking
+    new_width = width // factor
+    new_height = height // factor
+
+    # process the image by sampling pixels based on the factor
+    for y in range(new_height):
+        for x in range(new_width):
+            # calculate the index of the pixel in the original image
+            old_index = (y * factor * width) + (x * factor)
+            result.append(pixels[old_index])
+
+    # return the shrunk pixels and the new dimensions
+    return result, new_width, new_height
+
+
+def doEnlarge(pixels, width, height, param):
+    # convert the enlarge factor to an integer
+    factor = int(param)
+
+    # check that the enlarge factor is valid
+    if factor <= 0:
+        raise ValueError("Enlarge factor must be greater than 0!")
+
+    result = []
+
+    # calculate new dimensions after enlarging
+    new_width = width * factor
+    new_height = height * factor
+
+    # process the new image row by row, column by column
+    for y in range(new_height):
+        # map current row to the original row
+        old_y = y // factor
+        for x in range(new_width):
+            # map current column to the original column
+            old_x = x // factor
+
+            # calculate the index of the pixel in the original image
+            old_index = (old_y * width) + old_x
+            result.append(pixels[old_index])
+
+    # return the enlarged pixels and the new dimensions
+    return result, new_width, new_height
+
+
 def printHelp():
     # display the available commands and their usage
     print("""
@@ -147,7 +202,10 @@ Usage:
     python myWonderfulImProcApp.py --negative input.bmp output.bmp
     python myWonderfulImProcApp.py --hflip input.bmp output.bmp
     python myWonderfulImProcApp.py --vflip input.bmp output.bmp
-
+    python myWonderfulImProcApp.py --shrink VALUE input.bmp output.bmp
+    python myWonderfulImProcApp.py --enlarge VALUE input.bmp output.bmp
+    
+    
 Commands:
     --brightness VALUE
         Modify brightness by adding VALUE to each pixel channel.
@@ -168,6 +226,12 @@ Commands:
         
     --dflip
         Flip the image diagonally (transpose - swaps width and height).
+        
+    --shrink VALUE
+        Shrink the image by an integer factor (e.g., 2 halves the dimensions).
+        
+    --enlarge VALUE
+        Enlarge the image by an integer factor (e.g., 2 doubles the dimensions).
 
     --help
         Display this help message.
@@ -194,7 +258,7 @@ def main():
     command = sys.argv[1]
 
     # brightness and contrast require an additional parameter
-    if command in ("--brightness", "--contrast"):
+    if command in ("--brightness", "--contrast", "--shrink", "--enlarge"):
 
         # check that the correct number of arguments was provided
         if len(sys.argv) != 5:
@@ -263,6 +327,13 @@ def main():
 
         elif command == "--dflip":
             pixels = doDflip(pixels, width, height)
+
+        elif command == "--shrink":
+            pixels, width, height = doShrink(pixels, width, height, param)
+
+        elif command == "--enlarge":
+            pixels, width, height = doEnlarge(pixels, width, height, param)
+
 
         # create a new image with the original dimensions and mode
         result = Image.new(mode, (width, height))
